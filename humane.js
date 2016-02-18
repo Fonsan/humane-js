@@ -56,6 +56,7 @@
       this.timeoutAfterMove = o.timeoutAfterMove || false
       this.container = o.container
       this.expiry = o.expiry || 30000
+      this.maxQueueLength = o.maxQueueLength || 4
 
       try { this._setupEl() } // attempt to setup elements
       catch (e) {
@@ -229,6 +230,7 @@
          msg.html = html
          if (cb) msg.cb = cb
          this.queue.push(msg)
+         if (this.queue.length > ENV.config(msg.maxQueueLength, this.maxQueueLength)) this.queue.shift()
          this._run()
          return this
       },
