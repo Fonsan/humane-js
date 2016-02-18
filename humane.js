@@ -55,6 +55,7 @@
       this.clickToClose = o.clickToClose || false
       this.timeoutAfterMove = o.timeoutAfterMove || false
       this.container = o.container
+      this.expiry = o.expiry || 30000
 
       try { this._setupEl() } // attempt to setup elements
       catch (e) {
@@ -99,13 +100,19 @@
       _run: function () {
          if (this._animating || !this.queue.length || !this.el) return
 
+         var msg;
+         while((msg = this.queue.shift()) && (new Date().getTime() - ENV.config(msg.expiry, this.expiry)) > msg.time ) {
+         }
+         if (!msg) {
+            return;
+         }
+
          this._animating = true
          if (this.currentTimer) {
             clearTimeout(this.currentTimer)
             this.currentTimer = null
          }
 
-         var msg = this.queue.shift()
          var clickToClose = ENV.config(msg.clickToClose,this.clickToClose)
 
          if (clickToClose) {
@@ -210,7 +217,7 @@
          else if (cb) cb()
       },
       log: function (html, o, cb, defaults) {
-         var msg = {}
+         var msg = {time: new Date().getTime()}
          if (defaults)
            for (var opt in defaults)
                msg[opt] = defaults[opt]
